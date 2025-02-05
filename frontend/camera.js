@@ -6,7 +6,7 @@ const views = {
 	vue2: { camera: { position: [85, 100, 0], rotation: [-Math.PI / 2, Math.PI / 4, Math.PI / 2] } },
 	vue3: { camera: { position: [0, 80, -200], rotation: [-Math.PI / 60, 0, 0] } },
 	vue4: { camera: { position: [100, 100, 350], rotation: [-Math.PI / 100, Math.PI / 4, 0] } },
-	vue5: { camera: { position: [420, 530, 490], rotation: [0, -0.9948376736367676, 0] } },
+	vue5: { camera: { position: [470, 530, 430], rotation: [0, -0.9948376736367676, 0] } },
 };
 
 let isLoading = false;

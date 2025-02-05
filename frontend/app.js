@@ -5,10 +5,19 @@ import { createLoadingOverlay, removeLoadingOverlay } from './loading_screen.js'
 
 (function () {
     window.scene = new THREE.Scene();
-    window.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 10, 5000);
+
+    // Caméra avec un champ de vision plus ajusté pour les petits écrans
+    window.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 5000);
+    window.camera.position.set(0, 0, 100); 
+    
+    // Rendu avec antialiasing amélioré
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio, 20);
+    
+    // Pixel Ratio boosté artificiellement pour plus de netteté
+    // renderer.setPixelRatio(2); // Force un ratio de 2 même sur un petit écran
+
+    
     
     const ciel = new THREE.TextureLoader().load('/image/Capture d’écran 2025-01-15 à 16.35.37.png');
     scene.background = ciel;
@@ -224,6 +233,7 @@ import { createLoadingOverlay, removeLoadingOverlay } from './loading_screen.js'
                             camera.rotation.y += rotateSpeed; // Rotation vers la droite
 						break;
                     }
+                    console.log(camera.position);
                 });
     
         // Ajout des contrôles des paddles
@@ -238,6 +248,10 @@ import { createLoadingOverlay, removeLoadingOverlay } from './loading_screen.js'
         document.addEventListener('keyup', (event) => {
             keysPressed[event.key] = false;
         });
+
+        let lastRenderTime = 0;
+        const fps = 60;
+        const fpsInterval = 1000 / fps;
         
         function animate() {
             // console.log('Balle position:', ball.position);
@@ -249,6 +263,14 @@ import { createLoadingOverlay, removeLoadingOverlay } from './loading_screen.js'
 			// console.log(camera.position);
 			// console.log(camera.rotation);
 			// console.log(camera.position);
+
+            const currentTime = Date.now();
+            const elapsed = currentTime - lastRenderTime;
+            if (elapsed > fpsInterval) {
+                lastRenderTime = currentTime - (elapsed % fpsInterval);
+                update();
+            }
+            
             
             if (keysPressed['w'] && paddle_right.position.x > border_top.position.x + 10) {
                 paddle_right.position.x -= paddleSpeed;
