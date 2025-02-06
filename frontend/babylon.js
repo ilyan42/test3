@@ -52,25 +52,68 @@ const ambientLight = new BABYLON.HemisphericLight(
 ambientLight.intensity = 0.8;
 
 // Chargement du stade
-BABYLON.SceneLoader.Append("/3d_object/", "test6.glb", scene, function (scene) {
+BABYLON.SceneLoader.Append("/3d_object/", "test6.glb", scene, function () {
     console.log("Stade chargé avec succès !");
+
+    scene.meshes.forEach(m => {
+        console.log("Nom du mesh :", m.name);
+    });
     
-    const stade = scene.getMeshByName("Plane.001");
-    stade.scaling = new BABYLON.Vector3(2, 2, 2);
-    stade.position = new BABYLON.Vector3(0, 0, 0);
-
-    // Configuration des matériaux pour le stade
-    if (stade.material) {
-        stade.material.transparencyMode = 0;
-        stade.material.backFaceCulling = false;
-        if (stade.material.pbr) {
-            stade.material.pbr.usePhysicalLightFalloff = true;
+    scene.meshes.forEach(m => {
+        if (m.name === "test6") { // Remplace par le nom correct du mesh principal
+            m.scaling = new BABYLON.Vector3(0, 0, 0);
+            m.position = new BABYLON.Vector3(0, 0, 0);
+            console.log("Scale appliqué sur :", m.name);
         }
-    }
-
-    console.log("Nom du mesh :", stade.name);
+    });
 });
 
+BABYLON.SceneLoader.ImportMesh("", "/3d_object/", "ImageToStl.com_test2.glb", scene, function (newMeshes) {
+    console.log("ImageToStl.com_test.glb chargé avec succès !");
+    
+    newMeshes.forEach(m => {
+        console.log("Nom du mesh :", m.name);
+
+        // Appliquer une mise à l'échelle et repositionner
+        m.scaling = new BABYLON.Vector3(1, 1, 1);
+        m.position = new BABYLON.Vector3(0, 0, 0);
+
+        // Réinitialiser le pivot pour plus de précision dans la rotation
+        if (m.getBoundingInfo()) {
+            let boundingBox = m.getBoundingInfo().boundingBox;
+            m.setPivotPoint(boundingBox.centerWorld);
+        }
+
+        // Appliquer une rotation pour remettre l'objet droit
+        // m.rotation = new BABYLON.Vector3(0, BABYLON.Tools.ToRadians(45), BABYLON.Tools.ToRadians(45));
+        // Ou utiliser rotationQuaternion pour plus de précision
+        // m.rotationQuaternion = BABYLON.Quaternion.RotationAxis(BABYLON.Axis.X, BABYLON.Tools.ToRadians(90));
+        // m.rotationQuaternion = m.rotationQuaternion.multiply(BABYLON.Quaternion.RotationAxis(BABYLON.Axis.Y, BABYLON.Tools.ToRadians(45)));
+    });
+
+    console.log("Scaling et rotation appliqués aux meshes !");
+});
+// BABYLON.SceneLoader.Append("/3d_object/", "test6.glb", scene, function (scene) {
+//     if (scene.length === 0) {
+//         console.error("Aucun mesh trouvé dans le modèle");
+//         return;
+//     }
+
+//     scene.forEach(mesh => {
+//         console.log("Nom du mesh :", mesh.name);
+//         // Appliquer les transformations à chaque mesh
+//         const stade = scene.getMeshByName("Plane.001");
+//         stade.scaling = new BABYLON.Vector3(2, 2, 2);
+//         stade.position = new BABYLON.Vector3(0, 0, 0);
+
+//         // Configuration optionnelle des matériaux
+//         if (mesh.material) {
+//             mesh.material.backFaceCulling = false;
+//         }
+//     });
+// }, null, function (scene, message) {
+//     console.error("Erreur de chargement:", message);
+// });
 
 const environment = scene.createDefaultEnvironment({
     createSkybox: false,
@@ -118,7 +161,7 @@ BABYLON.SceneLoader.Append("/3d_object/", "persoTest.glb", scene, function (scen
     console.log("perso chargé avec succès !");
 
     scene.meshes.forEach(mesh => {
-        console.log("Nom du mesh :", mesh.name);
+        // console.log("Nom du mesh :", mesh.name);
         
         // Configuration des matériaux
         if (mesh.material) {
@@ -172,8 +215,8 @@ const views = {
         rotation: new BABYLON.Vector3(0.5, 0.8, 0)
     },
     vue2: {
-        position: new BABYLON.Vector3(20, 10, -100),
-        rotation: new BABYLON.Vector3(0.2, 0, 0)
+        position: new BABYLON.Vector3(-66.03495084495417, 7.39180037613985, -117.61528871253944),
+        rotation: new BABYLON.Vector3(-0.005000000000000001, -1.7035095560657294, 0)
     },
     vue3: {
         position: new BABYLON.Vector3(-30, 20, -80),
@@ -308,7 +351,8 @@ engine.runRenderLoop(() => {
         canvas.width = canvas.clientWidth * scale;
         canvas.height = canvas.clientHeight * scale;
     }
-    console.log(camera.position);
+    // console.log(camera.position);
+    // console.log(camera.rotation);
     scene.render();
 });
 
