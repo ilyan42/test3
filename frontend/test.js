@@ -1,4 +1,4 @@
-import { changeView } from "./camera.js";
+import { changeView } from "./babylon.js";
 
 document.querySelectorAll("button[data-view]").forEach(button => {
 	button.addEventListener("click", function () {

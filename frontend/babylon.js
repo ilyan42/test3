@@ -22,8 +22,8 @@ scene.performancePriority = BABYLON.Scene.PRIORITY_ANTIALIAS;
 // Création de la caméra
 const camera = new BABYLON.FreeCamera("camera", new BABYLON.Vector3(7.860370854357264, 4, -55.57231601704761), scene);
 camera.attachControl(canvas, true);
-camera.position = new BABYLON.Vector3(42, 4, -59);
-camera.rotation = new BABYLON.Vector3(0, -2.4599999999999915, 0);
+camera.position = new BABYLON.Vector3(-45.79301951065982, 5.879735371044789, -31.342210947081313);
+camera.rotation = new BABYLON.Vector3(-0.029665280069011667, -2.566387085794712, 0);
 camera.minZ = 0.1;
 camera.maxZ = 1000;
 
@@ -52,68 +52,87 @@ const ambientLight = new BABYLON.HemisphericLight(
 ambientLight.intensity = 0.8;
 
 // Chargement du stade
-BABYLON.SceneLoader.Append("/3d_object/", "test6.glb", scene, function () {
+BABYLON.SceneLoader.Append("/3d_object/", "ImageToStl.com_football_stadiumv2.glb", scene, function () {
     console.log("Stade chargé avec succès !");
 
-    scene.meshes.forEach(m => {
-        console.log("Nom du mesh :", m.name);
-    });
+    // scene.meshes.forEach(m => {
+    //     console.log("Nom du mesh :", m.name);
+    // });
     
     scene.meshes.forEach(m => {
         if (m.name === "test6") { // Remplace par le nom correct du mesh principal
             m.scaling = new BABYLON.Vector3(0, 0, 0);
             m.position = new BABYLON.Vector3(0, 0, 0);
-            console.log("Scale appliqué sur :", m.name);
+            // console.log("Scale appliqué sur :", m.name);
         }
     });
 });
 
-BABYLON.SceneLoader.ImportMesh("", "/3d_object/", "ImageToStl.com_test2.glb", scene, function (newMeshes) {
-    console.log("ImageToStl.com_test.glb chargé avec succès !");
-    
-    newMeshes.forEach(m => {
-        console.log("Nom du mesh :", m.name);
+BABYLON.SceneLoader.ImportMesh("", "/3d_object/", "versionFinalV2.glb", scene, function (newMeshes, particleSystems, skeletons, animationGroups) {
+    console.log("Modèle chargé avec succès !");
 
-        // Appliquer une mise à l'échelle et repositionner
-        m.scaling = new BABYLON.Vector3(1, 1, 1);
-        m.position = new BABYLON.Vector3(0, 0, 0);
-
-        // Réinitialiser le pivot pour plus de précision dans la rotation
-        if (m.getBoundingInfo()) {
-            let boundingBox = m.getBoundingInfo().boundingBox;
-            m.setPivotPoint(boundingBox.centerWorld);
+    // Trouver le mesh racine (parent)
+    let rootMesh = null;
+    newMeshes.forEach(mesh => {
+        if (!mesh.parent) {
+            rootMesh = mesh;
+            // console.log("Mesh racine trouvé:", mesh.name);
         }
-
-        // Appliquer une rotation pour remettre l'objet droit
-        // m.rotation = new BABYLON.Vector3(0, BABYLON.Tools.ToRadians(45), BABYLON.Tools.ToRadians(45));
-        // Ou utiliser rotationQuaternion pour plus de précision
-        // m.rotationQuaternion = BABYLON.Quaternion.RotationAxis(BABYLON.Axis.X, BABYLON.Tools.ToRadians(90));
-        // m.rotationQuaternion = m.rotationQuaternion.multiply(BABYLON.Quaternion.RotationAxis(BABYLON.Axis.Y, BABYLON.Tools.ToRadians(45)));
     });
 
-    console.log("Scaling et rotation appliqués aux meshes !");
+    // Si on trouve un mesh racine, on le déplace
+    if (rootMesh) {
+        rootMesh.position = new BABYLON.Vector3(0, 100, 0);
+    } else {
+        // Si pas de mesh racine, on crée un conteneur
+        let container = new BABYLON.TransformNode("container", scene);
+        newMeshes.forEach(mesh => {
+            mesh.setParent(container);
+        });
+        container.position = new BABYLON.Vector3(0, 100, 0);
+    }
+
+    // Afficher la hiérarchie pour debug
+    // newMeshes.forEach(mesh => {
+    //     console.log(`Mesh: ${mesh.name}, Parent: ${mesh.parent ? mesh.parent.name : 'pas de parent'}`);
+    // });
 });
-// BABYLON.SceneLoader.Append("/3d_object/", "test6.glb", scene, function (scene) {
-//     if (scene.length === 0) {
-//         console.error("Aucun mesh trouvé dans le modèle");
-//         return;
-//     }
 
-//     scene.forEach(mesh => {
-//         console.log("Nom du mesh :", mesh.name);
-//         // Appliquer les transformations à chaque mesh
-//         const stade = scene.getMeshByName("Plane.001");
-//         stade.scaling = new BABYLON.Vector3(2, 2, 2);
-//         stade.position = new BABYLON.Vector3(0, 0, 0);
 
-//         // Configuration optionnelle des matériaux
-//         if (mesh.material) {
-//             mesh.material.backFaceCulling = false;
-//         }
-//     });
-// }, null, function (scene, message) {
-//     console.error("Erreur de chargement:", message);
-// });
+
+BABYLON.SceneLoader.ImportMesh("", "/3d_object/", "ImageToStl.com_footballterraindejeuxv2.glb", scene, function (newMeshes, particleSystems, skeletons, animationGroups) {
+    console.log("Modèle chargé avec succès !");
+
+    // Trouver le mesh racine (parent)
+    let rootMesh = null;
+    newMeshes.forEach(mesh => {
+        if (!mesh.parent) {
+            rootMesh = mesh;
+            // console.log("Mesh racine trouvé:", mesh.name);
+        }
+    });
+
+    // Si on trouve un mesh racine, on le déplace
+    if (rootMesh) {
+        rootMesh.position = new BABYLON.Vector3(0, 300, 0);
+    } else {
+        // Si pas de mesh racine, on crée un conteneur
+        let test = new BABYLON.TransformNode("test", scene);
+        newMeshes.forEach(mesh => {
+            mesh.setParent(test);
+        });
+        test.position = new BABYLON.Vector3(0, 300, 0);
+    }
+
+    // Afficher la hiérarchie pour debug
+    // newMeshes.forEach(mesh => {
+    //     console.log(`Mesh: ${mesh.name}, Parent: ${mesh.parent ? mesh.parent.name : 'pas de parent'}`);
+    // });
+});
+
+
+
+
 
 const environment = scene.createDefaultEnvironment({
     createSkybox: false,
@@ -123,16 +142,6 @@ const environment = scene.createDefaultEnvironment({
     enableGroundShadow: true,
     groundYBias: 1
 });
-
-// const skymaterial = new BABYLON.StandardMaterial("skyMaterial", scene);
-// skymaterial.backFaceCulling = false;
-// skymaterial.reflectionTexture = new BABYLON.CubeTexture("/skybox/skybox", scene);
-// skymaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
-// skymaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
-// skymaterial.specularColor = new BABYLON.Color3(0, 0, 0);
-// const skybox = BABYLON.MeshBuilder.CreateBox("skybox", {size: 10000}, scene);
-// skybox.material = skymaterial;
-// Création de la sphère pour le ciel
 
 const skysphere = BABYLON.MeshBuilder.CreateSphere("skysphere", {
     diameter: 1000,
@@ -156,14 +165,60 @@ skysphere.infiniteDistance = true; // Reste fixe par rapport à la caméra
 skysphere.scaling.y = -1;
 
 
-// Chargement du personnage
-BABYLON.SceneLoader.Append("/3d_object/", "persoTest.glb", scene, function (scene) {
-    console.log("perso chargé avec succès !");
+// BABYLON.SceneLoader.ImportMesh("", "/3d_object/", "jongleAnnimationV4.glb", scene, function (newMeshes, particleSystems, skeletons, animationGroups) {
 
-    scene.meshes.forEach(mesh => {
-        // console.log("Nom du mesh :", mesh.name);
-        
-        // Configuration des matériaux
+//     newMeshes.forEach(mesh => {
+//         if (mesh.material) {
+//             mesh.material.transparencyMode = 0;
+//             mesh.material.backFaceCulling = false;
+//             if (mesh.material.pbr) {
+//                 mesh.material.pbr.usePhysicalLightFalloff = true;
+//             }
+//         }
+//     });
+
+//     let perso = newMeshes.find(mesh => mesh.name === "__root__");
+//     if (perso) {
+//         perso.scaling = new BABYLON.Vector3(3, 3, 3);
+//         perso.position = new BABYLON.Vector3(-80, 2, -55);
+//         perso.rotation = new BABYLON.Vector3(0, Math.PI/4, 0);
+//     }
+
+//     // Stopper toutes les animations d'abord
+//     animationGroups.forEach(anim => {
+//         anim.stop();
+//     });
+
+//     // Démarrer seulement l'animation de la balle et l'animation principale
+//     const ballAnimation = animationGroups.find(anim => anim.name === "Ball low_Baked_0Action");
+//     const mainAnimation = animationGroups.find(anim => anim.name === "Armature.006|mixamo.com|Layer0"); // ou Layer0.001
+// 	// const mainAnimation2 = animationGroups.find(anim => anim.name === "Armature.001|mixamo.com|Layer0"); // ou Layer0.001
+
+
+//     if (ballAnimation && mainAnimation) {
+//         ballAnimation.start(true);
+// 		mainAnimation.start(true);
+//     }
+
+// 	// if (mainAnimation2 && mainAnimation2 !== mainAnimation) {
+// 	// 	mainAnimation2.start(true);
+// 	// 	console.log("Animation principale 2 démarrée");
+// 	// }
+
+//     if (typeof controlPerso === "function") {
+//         controlPerso(perso);
+//     }
+// });
+
+
+
+
+
+
+
+BABYLON.SceneLoader.ImportMesh("", "/3d_object/", "testPersoPageDeGardeV1.glb", scene, function (newMeshes, particleSystems, skeletons, animationGroups) {
+
+    newMeshes.forEach(mesh => {
         if (mesh.material) {
             mesh.material.transparencyMode = 0;
             mesh.material.backFaceCulling = false;
@@ -173,15 +228,24 @@ BABYLON.SceneLoader.Append("/3d_object/", "persoTest.glb", scene, function (scen
         }
     });
 
-    const perso = scene.getMeshByName("__root__");
-    perso.scaling = new BABYLON.Vector3(2.5, 2.5, 2.5);
-    perso.position = new BABYLON.Vector3(20, 2, -65);
-    perso.rotation = new BABYLON.Vector3(0, 45, 0);
+    let perso = newMeshes.find(mesh => mesh.name === "__root__");
+    if (perso) {
+        perso.scaling = new BABYLON.Vector3(5.5, 5.5, 5.5);
+        perso.position = new BABYLON.Vector3(-90, 1.5, -65);
+        perso.rotation = new BABYLON.Vector3(0, Math.PI/4, 0);
+    }
 
     if (typeof controlPerso === "function") {
         controlPerso(perso);
     }
 });
+
+
+
+
+
+
+
 
 // Fonction pour créer une plane avec texture d'herbe
 function createGrassPlane(name, position) {
@@ -198,30 +262,52 @@ function createGrassPlane(name, position) {
 }
 
 // Création des planes d'herbe
-createGrassPlane("grassPlane1", new BABYLON.Vector3(19, 0.5, -152));
-createGrassPlane("grassPlane2", new BABYLON.Vector3(19, 0.5, -102));
-createGrassPlane("grassPlane3", new BABYLON.Vector3(19, 0.5, -52));
-createGrassPlane("grassPlane4", new BABYLON.Vector3(-26, 0.5, -152));
-createGrassPlane("grassPlane5", new BABYLON.Vector3(-26, 0.5, -102));
-createGrassPlane("grassPlane6", new BABYLON.Vector3(-26, 0.5, -52));
+createGrassPlane("grassPlane1", new BABYLON.Vector3(-61.5, 1.3, -152));
+createGrassPlane("grassPlane2", new BABYLON.Vector3(-61.5, 1.3, -102));
+createGrassPlane("grassPlane3", new BABYLON.Vector3(-61.5, 1.3, -52));
+createGrassPlane("grassPlane4", new BABYLON.Vector3(-106.5, 1.3, -152));
+createGrassPlane("grassPlane5", new BABYLON.Vector3(-106.5, 1.3, -102));
+createGrassPlane("grassPlane6", new BABYLON.Vector3(-106.5, 1.3, -52));
+
+function createGrassPlane2(name, position) {
+    const grassPlane = BABYLON.MeshBuilder.CreateGround(name, {width: 32.8, height: 58}, scene);
+    const grassMaterial = new BABYLON.StandardMaterial(name + "Material", scene);
+    grassMaterial.diffuseTexture = new BABYLON.Texture("/image/perfect-green-grass.jpg", scene);
+    grassMaterial.backFaceCulling = false;
+    // Amélioration de la qualité des textures
+    grassMaterial.diffuseTexture.anisotropicFilteringLevel = 16;
+    grassMaterial.diffuseTexture.uScale = 5;
+    grassMaterial.diffuseTexture.vScale = 5;
+    grassPlane.material = grassMaterial;
+    grassPlane.position = position;
+}
+
+createGrassPlane2("grassPlane7", new BABYLON.Vector3(-23.6, 299.8, -102));
+createGrassPlane2("grassPlane8", new BABYLON.Vector3(-23.6, 299.8, -44));
+createGrassPlane2("grassPlane9", new BABYLON.Vector3(9.2, 299.8, -102));
+createGrassPlane2("grassPlane10", new BABYLON.Vector3(9.2, 299.8, -44));
 
 const views = {
     default: {
-        position: new BABYLON.Vector3(42, 4, -59),
-        rotation: new BABYLON.Vector3(0, -2.4599999999999915, 0)
+        position: new BABYLON.Vector3(-45.79301951065982, 5.879735371044789, -31.342210947081313),
+        rotation: new BABYLON.Vector3(-0.029665280069011667, -2.566387085794712, 0)
     },
     vue1: {
-        position: new BABYLON.Vector3(500, 500, 500),
-        rotation: new BABYLON.Vector3(0.5, 0.8, 0)
+        position: new BABYLON.Vector3(-121.10280824924784, 24.6207952767514, -174.07209971938224),
+        rotation: new BABYLON.Vector3(-0.11883037823762914, -2.5943873381271416, 0)
     },
     vue2: {
-        position: new BABYLON.Vector3(-66.03495084495417, 7.39180037613985, -117.61528871253944),
-        rotation: new BABYLON.Vector3(-0.005000000000000001, -1.7035095560657294, 0)
+        position: new BABYLON.Vector3(-18.362079870354155, 108.25251269427612, 25.862876364155152),
+        rotation: new BABYLON.Vector3(0.030709202934622, -3.1253471752812234, 0)
     },
     vue3: {
-        position: new BABYLON.Vector3(-30, 20, -80),
-        rotation: new BABYLON.Vector3(0.3, -0.5, 0)
+        position: new BABYLON.Vector3(-54.75561421839585, 323.8935256263618, -69.46923226717574),
+        rotation: new BABYLON.Vector3(0.04110218558828448, -1.5940112517089828, 0)
     },
+	vue4: {
+		position: new BABYLON.Vector3(107.45137114956808, 350.16014619598326, -71.0351214961887),
+		rotation: new BABYLON.Vector3(0.3689776126123451, -1.5805112517089825, 0)
+	},
     aerienne: {
         position: new BABYLON.Vector3(0, 100, 0),
         rotation: new BABYLON.Vector3(Math.PI/2, 0, 0)
@@ -273,73 +359,106 @@ function smoothTransition(targetPosition, targetRotation, duration = 1.5) {
     });
 }
 
+let loadingOverlay;
+let isLoading = false;
+let targetView = null;
+
+function createLoadingOverlay() {
+	loadingOverlay = document.createElement('div');
+	loadingOverlay.id = 'loadingOverlay';
+	loadingOverlay.innerHTML = `
+		<link rel="stylesheet" href="./static/js/css/test.css">
+		<div class="loading-container">
+			<div class="spinner"></div>
+			<div class="loading-text">Chargement<span>.</span><span>.</span><span>.</span></div>
+		</div>
+	`;
+	document.body.appendChild(loadingOverlay);
+}
+
+function removeLoadingOverlay() {
+	if (loadingOverlay) {
+		console.log("Suppression de l'overlay...");
+		loadingOverlay.style.opacity = '0';
+		setTimeout(() => {
+			if (loadingOverlay && loadingOverlay.parentNode) {
+				document.body.removeChild(loadingOverlay);
+				console.log("Overlay supprimé");
+			}
+			isLoading = false;
+			console.log("isLoading:", isLoading);
+			if (targetView) {
+				changeView(targetView);
+				targetView = null;
+			}
+		}, 1000);
+	}
+}
 // Fonction de changement de vue améliorée
-function changeView(viewName) {
-    const view = views[viewName];
-    if (!view) {
-        console.warn(`Vue '${viewName}' non définie`);
-        return;
-    }
+export function changeView(viewName) {
+	const view = views[viewName];
+	if (!view || window.currentView === viewName)
+		return;
+	const previousView = window.currentView;
+	window.currentView = viewName;
+	targetView = viewName;
+	if (isLoading) {
+		return;
+	}
+	smoothTransition(view.position, view.rotation, 1.5);
+	handleViewTransitions(viewName, previousView);
+}
 
-    if (window.currentView === viewName) {
-        return;
-    }
+function handleViewTransitions(viewName, previousView) {
+	console.log("Changement de vue:", viewName);
+	console.log("isLoading:", isLoading);
+	if (isLoading)
+		return;
 
-    window.currentView = viewName;
-    smoothTransition(view.position, view.rotation);
+	if (viewName === 'vue1')
+	{
+		console.log('Chargement de la vue 1...');
+		// isLoading = true;
+		changeView('vue1');
 
-    // Désactiver temporairement les contrôles de la caméra pendant la transition
-    camera.detachControl(canvas);
-    setTimeout(() => {
-        camera.attachControl(canvas, true);
-    }, 1500);
+		setTimeout(() =>
+		{
+			window.currentView = 'vue1';
+			createLoadingOverlay();
+		}, 1500);
+
+		setTimeout(() =>
+		{
+			// removeLoadingOverlay();
+			changeView('vue2');
+			// isLoading = false;
+		}, 3500);
+		setTimeout(() => removeLoadingOverlay(), 5000);
+	}
+	if (viewName === 'vue3')
+	{
+		console.log('Chargement de la vue 3...');
+		// isLoading = true;
+		createLoadingOverlay();
+		
+		setTimeout(() =>
+		{
+			changeView('vue3');
+			window.currentView = 'vue3';
+		}, 1500);
+		setTimeout(() => 
+		{
+			removeLoadingOverlay();
+			changeView('vue4');
+		}, 3500);
+		// setTimeout(() => removeLoadingOverlay(), 5000);
+	}
 }
 
 // Gestion des touches pour les changements de vue
 
 // Création de la lumière déplaçable
 // Création d'une Point Light
-
-
-window.addEventListener('keydown', (event) => {
-    switch(event.key) {
-        case '1':
-            changeView('vue1');
-            break;
-        case '2':
-            changeView('vue2');
-            break;
-        case '3':
-            changeView('vue3');
-            break;
-        case '4':
-            changeView('aerienne');
-            break;
-        case '0':
-            changeView('default');
-            break;
-        case 'w':
-            pointLight.position.z += 1;
-            break;
-        case 's':
-            pointLight.position.z -= 1;
-            break;
-        case 'a':
-            pointLight.position.x -= 1;
-            break;
-        case 'd':
-            pointLight.position.x += 1;
-            break;
-        case 'q':
-            pointLight.position.y += 1;
-            break;
-        case 'e':
-            pointLight.position.y -= 1;
-            break;
-
-        // Autres contrôles existants...
-    }
-});
 
 
 // Boucle de rendu améliorée
@@ -351,8 +470,7 @@ engine.runRenderLoop(() => {
         canvas.width = canvas.clientWidth * scale;
         canvas.height = canvas.clientHeight * scale;
     }
-    // console.log(camera.position);
-    // console.log(camera.rotation);
+	// console.log(camera.position, camera.rotation);
     scene.render();
 });
 
@@ -369,3 +487,15 @@ scene.onBeforeRenderObservable.add(() => {
         }
     });
 });
+
+
+
+
+
+
+
+// ImageToStl.com_football_stadiumv2.glb
+// versionFinalV2.glb
+// ImageToStl.com_footballterraindejeuxv2.glb
+// testPersoPageDeGardeV1.glb
+// jongleAnnimationV4.glb
