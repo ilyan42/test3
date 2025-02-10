@@ -7,7 +7,7 @@ const engine = new BABYLON.Engine(canvas, true, {
 });
 
 // Configuration de la scène avec une meilleure qualité
-const scene = new BABYLON.Scene(engine);
+window.scene = new BABYLON.Scene(engine);
 scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
 scene.imageProcessingConfiguration.contrast = 1.2;
 scene.imageProcessingConfiguration.exposure = 1.0;
@@ -20,10 +20,10 @@ scene.getEngine().setHardwareScalingLevel(1.0);
 scene.performancePriority = BABYLON.Scene.PRIORITY_ANTIALIAS;
 
 // Création de la caméra
-const camera = new BABYLON.FreeCamera("camera", new BABYLON.Vector3(7.860370854357264, 4, -55.57231601704761), scene);
+window.camera = new BABYLON.FreeCamera("camera", new BABYLON.Vector3(7.860370854357264, 4, -55.57231601704761), scene);
 camera.attachControl(canvas, true);
-camera.position = new BABYLON.Vector3(-45.79301951065982, 5.879735371044789, -31.342210947081313);
-camera.rotation = new BABYLON.Vector3(-0.029665280069011667, -2.566387085794712, 0);
+camera.position = new BABYLON.Vector3(107.45137114956808, 350.16014619598326, -71.0351214961887),
+camera.rotation = new BABYLON.Vector3(0.3689776126123451, -1.5805112517089825, 0)
 camera.minZ = 0.1;
 camera.maxZ = 1000;
 
@@ -76,7 +76,7 @@ BABYLON.SceneLoader.ImportMesh("", "/3d_object/", "versionFinalV2.glb", scene, f
     newMeshes.forEach(mesh => {
         if (!mesh.parent) {
             rootMesh = mesh;
-            // console.log("Mesh racine trouvé:", mesh.name);
+            // console.log("Mesh racine trouvpyé:", mesh.name);
         }
     });
 
@@ -287,199 +287,117 @@ createGrassPlane2("grassPlane8", new BABYLON.Vector3(-23.6, 299.8, -44));
 createGrassPlane2("grassPlane9", new BABYLON.Vector3(9.2, 299.8, -102));
 createGrassPlane2("grassPlane10", new BABYLON.Vector3(9.2, 299.8, -44));
 
-const views = {
-    default: {
-        position: new BABYLON.Vector3(-45.79301951065982, 5.879735371044789, -31.342210947081313),
-        rotation: new BABYLON.Vector3(-0.029665280069011667, -2.566387085794712, 0)
-    },
-    vue1: {
-        position: new BABYLON.Vector3(-121.10280824924784, 24.6207952767514, -174.07209971938224),
-        rotation: new BABYLON.Vector3(-0.11883037823762914, -2.5943873381271416, 0)
-    },
-    vue2: {
-        position: new BABYLON.Vector3(-18.362079870354155, 108.25251269427612, 25.862876364155152),
-        rotation: new BABYLON.Vector3(0.030709202934622, -3.1253471752812234, 0)
-    },
-    vue3: {
-        position: new BABYLON.Vector3(-54.75561421839585, 323.8935256263618, -69.46923226717574),
-        rotation: new BABYLON.Vector3(0.04110218558828448, -1.5940112517089828, 0)
-    },
-	vue4: {
-		position: new BABYLON.Vector3(107.45137114956808, 350.16014619598326, -71.0351214961887),
-		rotation: new BABYLON.Vector3(0.3689776126123451, -1.5805112517089825, 0)
-	},
-    aerienne: {
-        position: new BABYLON.Vector3(0, 100, 0),
-        rotation: new BABYLON.Vector3(Math.PI/2, 0, 0)
+
+const border_right = new BABYLON.MeshBuilder.CreateBox("border", {
+    width: 65,
+    height: 3,
+    depth: 1
+}, scene);
+border_right.position = new BABYLON.Vector3(-7, 300, -14);
+
+
+
+const border_left = new BABYLON.MeshBuilder.CreateBox("border", {
+    width: 65,
+    height: 3,
+    depth: 1
+}, scene);
+border_left.position = new BABYLON.Vector3(-7, 300, -130);
+
+
+
+
+const borderTop = new BABYLON.MeshBuilder.CreateBox("border", {
+    width: 115,
+    height: 3,
+    depth: 1
+}, scene);
+borderTop.position = new BABYLON.Vector3(25, 300, -72);
+borderTop.rotation = new BABYLON.Vector3(0, Math.PI/2, 0);
+
+
+
+
+const borderBottom = new BABYLON.MeshBuilder.CreateBox("border", {
+    width: 115,
+    height: 3,
+    depth: 1
+}, scene);
+borderBottom.position = new BABYLON.Vector3(-40, 300, -72);
+borderBottom.rotation = new BABYLON.Vector3(0, Math.PI/2, 0);
+
+
+
+
+const paddle_left = new BABYLON.MeshBuilder.CreateBox("padle_left", {
+    width: 6.5,
+    height: 1.5,
+    depth: 1.5
+}, scene);
+
+paddle_left.position = new BABYLON.Vector3(-7, 300, -120);
+
+const paddle_right = new BABYLON.MeshBuilder.CreateBox("padle_right", {
+    width: 6.5,
+    height: 1.5,
+    depth: 1.5
+}, scene);
+
+paddle_right.position = new BABYLON.Vector3(-7, 300, -24);
+
+const ball = new BABYLON.MeshBuilder.CreateSphere("ball", {
+    diameter: 3
+}, scene);
+
+ball.position = new BABYLON.Vector3(-7, 301.5, -72.5);
+const paddleSpeed = 0.8;
+const keys = {}; // Stocke l'état des touches enfoncées
+
+const minX = borderBottom.position.x + (borderBottom.scaling.x / 2) + 4.5;
+const maxX = borderTop.position.x - (borderTop.scaling.x / 2) - 4.5;
+
+// Met à jour les touches enfoncées
+addEventListener("keydown", (event) => keys[event.key] = true);
+addEventListener("keyup", (event) => keys[event.key] = false);
+
+// Met à jour la position des paddles
+function updatePaddles() {
+    if (keys["w"] && paddle_left.position.x > minX) {
+        paddle_left.position.x -= paddleSpeed;
     }
-};
-
-let currentTransitionAnimation = null;
-
-// Fonction de transition améliorée avec courbe d'animation
-function smoothTransition(targetPosition, targetRotation, duration = 1.5) {
-    // Annuler l'animation précédente si elle existe
-    if (currentTransitionAnimation) {
-        scene.onBeforeRenderObservable.remove(currentTransitionAnimation);
+    if (keys["s"] && paddle_left.position.x < maxX) {
+        paddle_left.position.x += paddleSpeed;
+    }
+    if (keys["ArrowUp"] && paddle_right.position.x > minX) {
+        paddle_right.position.x -= paddleSpeed;
+    }
+    if (keys["ArrowDown"] && paddle_right.position.x < maxX) {
+        paddle_right.position.x += paddleSpeed;
     }
 
-    const startPosition = camera.position.clone();
-    const startRotation = camera.rotation.clone();
-    const startTime = performance.now();
-
-    // Créer des vecteurs temporaires pour éviter la création d'objets pendant l'animation
-    const tempPosition = new BABYLON.Vector3();
-    const tempRotation = new BABYLON.Vector3();
-
-    // Fonction d'ease (lissage)
-    const easeInOutCubic = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-
-    currentTransitionAnimation = scene.onBeforeRenderObservable.add(() => {
-        const currentTime = performance.now();
-        let t = (currentTime - startTime) / (duration * 1000);
-
-        if (t >= 1) {
-            camera.position.copyFrom(targetPosition);
-            camera.rotation.copyFrom(targetRotation);
-            scene.onBeforeRenderObservable.remove(currentTransitionAnimation);
-            currentTransitionAnimation = null;
-            return;
-        }
-
-        // Appliquer la fonction d'ease
-        const easedT = easeInOutCubic(t);
-
-        // Interpolation de la position
-        BABYLON.Vector3.LerpToRef(startPosition, targetPosition, easedT, tempPosition);
-        camera.position.copyFrom(tempPosition);
-
-        // Interpolation de la rotation
-        BABYLON.Vector3.LerpToRef(startRotation, targetRotation, easedT, tempRotation);
-        camera.rotation.copyFrom(tempRotation);
-    });
+    requestAnimationFrame(updatePaddles); // Rafraîchit en continu
 }
 
-let loadingOverlay;
-let isLoading = false;
-let targetView = null;
-
-function createLoadingOverlay() {
-	loadingOverlay = document.createElement('div');
-	loadingOverlay.id = 'loadingOverlay';
-	loadingOverlay.innerHTML = `
-		<link rel="stylesheet" href="./static/js/css/test.css">
-		<div class="loading-container">
-			<div class="spinner"></div>
-			<div class="loading-text">Chargement<span>.</span><span>.</span><span>.</span></div>
-		</div>
-	`;
-	document.body.appendChild(loadingOverlay);
-}
-
-function removeLoadingOverlay() {
-	if (loadingOverlay) {
-		console.log("Suppression de l'overlay...");
-		loadingOverlay.style.opacity = '0';
-		setTimeout(() => {
-			if (loadingOverlay && loadingOverlay.parentNode) {
-				document.body.removeChild(loadingOverlay);
-				console.log("Overlay supprimé");
-			}
-			isLoading = false;
-			console.log("isLoading:", isLoading);
-			if (targetView) {
-				changeView(targetView);
-				targetView = null;
-			}
-		}, 1000);
-	}
-}
-// Fonction de changement de vue améliorée
-export function changeView(viewName) {
-	const view = views[viewName];
-	if (!view || window.currentView === viewName)
-		return;
-	const previousView = window.currentView;
-	window.currentView = viewName;
-	targetView = viewName;
-	if (isLoading) {
-		return;
-	}
-	smoothTransition(view.position, view.rotation, 1.5);
-	handleViewTransitions(viewName, previousView);
-}
-
-function handleViewTransitions(viewName, previousView) {
-	console.log("Changement de vue:", viewName);
-	console.log("isLoading:", isLoading);
-	if (isLoading)
-		return;
-
-	if (viewName === 'vue1')
-	{
-		console.log('Chargement de la vue 1...');
-		// isLoading = true;
-		changeView('vue1');
-
-		setTimeout(() =>
-		{
-			window.currentView = 'vue1';
-			createLoadingOverlay();
-		}, 1500);
-
-		setTimeout(() =>
-		{
-			// removeLoadingOverlay();
-			changeView('vue2');
-			// isLoading = false;
-		}, 3500);
-		setTimeout(() => removeLoadingOverlay(), 5000);
-	}
-	if (viewName === 'vue3')
-	{
-		console.log('Chargement de la vue 3...');
-		// isLoading = true;
-		createLoadingOverlay();
-		
-		setTimeout(() =>
-		{
-			changeView('vue3');
-			window.currentView = 'vue3';
-		}, 1500);
-		setTimeout(() => 
-		{
-			removeLoadingOverlay();
-			changeView('vue4');
-		}, 3500);
-		// setTimeout(() => removeLoadingOverlay(), 5000);
-	}
-}
-
-// Gestion des touches pour les changements de vue
-
-// Création de la lumière déplaçable
-// Création d'une Point Light
+// Démarre la boucle d'animation
+updatePaddles();
 
 
-// Boucle de rendu améliorée
 engine.runRenderLoop(() => {
-    // Ajuste la résolution du canvas à la taille de l'écran
     const scale = window.devicePixelRatio;
     if (canvas.width !== canvas.clientWidth * scale || canvas.height !== canvas.clientHeight * scale) {
         engine.resize(true);
         canvas.width = canvas.clientWidth * scale;
         canvas.height = canvas.clientHeight * scale;
     }
-	// console.log(camera.position, camera.rotation);
+    // console.log(camera.position); 
     scene.render();
 });
 
-// Gestionnaire de redimensionnement amélioré
-window.addEventListener('resize', () => {
+window.addEventListener('resize', () =>
+{
     engine.resize(true);
 });
 
-// Optimisation supplémentaire pour les textures
 scene.onBeforeRenderObservable.add(() => {
     scene.meshes.forEach(mesh => {
         if (mesh.material && mesh.material.diffuseTexture) {
